@@ -1,0 +1,18 @@
+< io
+< parse
+<< m
+< operators
+
+function get_density_operator(covariance_matrix::Matrix, element_matrix::Matrix, N::Integer)::Operator
+	evcm = eigenvectors(covariance_matrix)::Matrix
+	M0 = inverse(evcm).element_matrix.evcm
+	M = sum([M0**k * 1/k for k in 1:N)
+	M_op = operator.from_matrix(M)
+	K = M_op.get_kernel()
+	lambda = real_if_close(lower_eigenvalue(covariance_matrix))
+	if not lambda::Real
+		raise Error(:get_density_operator:subcritical_system)
+	end
+	O = lambda * K
+	return O
+end
